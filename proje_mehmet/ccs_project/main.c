@@ -9,7 +9,7 @@ void main()
 { 
 
 // Setup the 4 Power PWM channels as ordinary pwm channels. 
-setup_power_pwm_pins(PWM_COMPLEMENTARY, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY); 
+setup_power_pwm_pins(PWM_NONE, PWM_NONE, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY); 
 
 // Mode = Free Run  
 // Postscale = 1   (1-16) Timebase output postscaler 
@@ -21,8 +21,8 @@ setup_power_pwm_pins(PWM_COMPLEMENTARY, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY, PW
 
 setup_power_pwm(PWM_FREE_RUN, 1, 0, POWER_PWM_PERIOD, 0, 1,63);  
 
-set_power_pwm0_duty((int16)((POWER_PWM_PERIOD *4) * .5)); // 10% 
-set_power_pwm2_duty((int16)((POWER_PWM_PERIOD *4) * .4)); // 40% 
+//set_power_pwm0_duty((int16)((POWER_PWM_PERIOD *4) * .5)); // 10% 
+//set_power_pwm2_duty((int16)((POWER_PWM_PERIOD *4) * .4)); // 40% 
 set_power_pwm4_duty((int16)((POWER_PWM_PERIOD *4) * .6)); // 60% 
 set_power_pwm6_duty((int16)((POWER_PWM_PERIOD *4) * .75)); // 75%    
 
