@@ -26,5 +26,5 @@ setup_power_pwm(PWM_FREE_RUN, 1, 0, POWER_PWM_PERIOD, 0, 1,15);
 set_power_pwm4_duty((int16)((POWER_PWM_PERIOD *4) * .6)); // 60% 
 set_power_pwm6_duty((int16)((POWER_PWM_PERIOD *4) * .75)); // 75%    
 
-while(TRUE); 
+while(false); 
 }
