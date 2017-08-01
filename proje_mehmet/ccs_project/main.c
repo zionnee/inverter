@@ -19,7 +19,7 @@ setup_power_pwm_pins(PWM_ODD, PWM_NONE, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY);
 // Compare Postscale = 1 (Postscaler for Compare value) 
 // Dead Time 
 
-setup_power_pwm(PWM_FREE_RUN, 1, 0, POWER_PWM_PERIOD, 0, 1,63);  
+setup_power_pwm(PWM_FREE_RUN, 1, 0, POWER_PWM_PERIOD, 0, 1,15);  
 
 //set_power_pwm0_duty((int16)((POWER_PWM_PERIOD *4) * .5)); // 10% 
 //set_power_pwm2_duty((int16)((POWER_PWM_PERIOD *4) * .4)); // 40% 
