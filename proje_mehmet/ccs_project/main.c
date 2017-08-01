@@ -9,7 +9,7 @@ void main()
 { 
 
 // Setup the 4 Power PWM channels as ordinary pwm channels. 
-setup_power_pwm_pins(PWM_NONE, PWM_NONE, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY); 
+setup_power_pwm_pins(PWM_ODD, PWM_NONE, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY); 
 
 // Mode = Free Run  
 // Postscale = 1   (1-16) Timebase output postscaler 
