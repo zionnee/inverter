@@ -1,0 +1,110 @@
+CCS PCH C Compiler, Version 5.007, 61971               01-Aðu-17 10:51
+
+               Filename:   C:\Users\Hatice\Desktop\proje_mehmet\Yeni klasör\main.lst
+
+               ROM used:   110 bytes (1%)
+                           Largest free fragment is 16274
+               RAM used:   4 (1%) at main() level
+                           4 (1%) worst case
+               Stack used: 0 locations
+               Stack size: 31
+
+*
+0000:  GOTO   0004
+.................... #include<18F4431.h>  
+.................... //////// Standard Header file for the PIC18F4431 device //////////////// 
+.................... #device PIC18F4431 
+....................  
+.................... #list 
+....................  
+.................... #fuses INTRC_IO, NOWDT, NOPROTECT, NOBROWNOUT, PUT, NOLVP  
+.................... #use delay(clock=8000000)  
+....................  
+.................... #define POWER_PWM_PERIOD 1999  // 1 KHz pwm freq with 8 MHz osc.  
+....................  
+.................... //=======================================  
+.................... void main()  
+0004:  CLRF   FF8
+0006:  BCF    FD0.7
+0008:  MOVLW  72
+000A:  MOVWF  FD3
+000C:  MOVF   FD3,W
+000E:  BCF    FB9.0
+0010:  BCF    FC1.6
+0012:  BCF    FC1.7
+0014:  MOVLW  00
+0016:  MOVWF  FB8
+.................... {  
+....................  
+.................... // Setup the 4 Power PWM channels as ordinary pwm channels.  
+.................... setup_power_pwm_pins(PWM_COMPLEMENTARY, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY, PWM_COMPLEMENTARY);  
+0018:  MOVLW  50
+001A:  MOVWF  F6F
+....................  
+.................... // Mode = Free Run   
+.................... // Postscale = 1   (1-16) Timebase output postscaler  
+.................... // TimeBase = 0   (0-65355) Initial value of PWM Timebase  
+.................... // Period = 2000  (0-4095) Max value of PWM TimeBase  
+.................... // Compare = 0     (Timebase value for special event trigger)  
+.................... // Compare Postscale = 1 (Postscaler for Compare value)  
+.................... // Dead Time  
+....................  
+.................... setup_power_pwm(PWM_FREE_RUN, 1, 0, POWER_PWM_PERIOD, 0, 1,63);   
+001C:  SETF   F6B
+001E:  CLRF   F6E
+0020:  CLRF   F7F
+0022:  MOVLW  80
+0024:  MOVWF  F7E
+0026:  MOVLW  3F
+0028:  MOVWF  F6D
+002A:  CLRF   F7D
+002C:  CLRF   F7C
+002E:  MOVLW  CF
+0030:  MOVWF  F7B
+0032:  MOVLW  07
+0034:  MOVWF  F7A
+0036:  CLRF   F71
+0038:  CLRF   F70
+....................  
+.................... set_power_pwm0_duty((int16)((POWER_PWM_PERIOD *4) * .5)); // 10%  
+003A:  BSF    F6E.1
+003C:  MOVLW  9E
+003E:  MOVWF  F79
+0040:  MOVLW  0F
+0042:  MOVWF  F78
+0044:  BCF    F6E.1
+.................... set_power_pwm2_duty((int16)((POWER_PWM_PERIOD *4) * .4)); // 40%  
+0046:  BSF    F6E.1
+0048:  MOVLW  7E
+004A:  MOVWF  F77
+004C:  MOVLW  0C
+004E:  MOVWF  F76
+0050:  BCF    F6E.1
+.................... set_power_pwm4_duty((int16)((POWER_PWM_PERIOD *4) * .6)); // 60%  
+0052:  BSF    F6E.1
+0054:  MOVLW  BD
+0056:  MOVWF  F75
+0058:  MOVLW  12
+005A:  MOVWF  F74
+005C:  BCF    F6E.1
+.................... set_power_pwm6_duty((int16)((POWER_PWM_PERIOD *4) * .75)); // 75%     
+005E:  BSF    F6E.1
+0060:  MOVLW  6D
+0062:  MOVWF  F73
+0064:  MOVLW  17
+0066:  MOVWF  F72
+0068:  BCF    F6E.1
+....................  
+.................... while(TRUE);  
+006A:  BRA    006A
+.................... } 
+006C:  SLEEP 
+
+Configuration Fuses:
+   Word  1: C800   INTRC_IO FCMEN IESO
+   Word  2: 3E0C   PUT NOBROWNOUT BORV20 NOWDT WDT32768 NOWINEN
+   Word  3: 9D3C   NOPWMPIN LPOL_HIGH HPOL_HIGH T1LOWPOWER FLTAC1 SSP_RC PWM4B5 EXCLKC3 MCLR
+   Word  4: 0081   STVREN NOLVP NODEBUG
+   Word  5: C00F   NOPROTECT NOCPB NOCPD
+   Word  6: E00F   NOWRT NOWRTC NOWRTB NOWRTD
+   Word  7: 400F   NOEBTR NOEBTRB

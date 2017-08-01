@@ -1,0 +1,276 @@
+#include <main.h>
+
+#word       PTCON0            = 0xF7F
+#word       PTCON1            = 0xF7E
+#word       PTMRL             = 0xF7D
+#word       PTMRH             = 0xF7C
+#word       PTPERL            = 0xF7B
+#word       PTPERH            = 0xF7A
+#word       PDC0L             = 0xF79
+#word       PDC0H             = 0xF78
+#word       PDC1L             = 0xF77
+#word       PDC1H             = 0xF76
+#word       PDC2L             = 0xF75
+#word       PDC2H             = 0xF74
+#word       PDC3L             = 0xF73
+#word       PDC3H             = 0xF72
+#word       PWMCON0           = 0xF6F
+#word       PWMCON1           = 0xF6E
+
+#word       ANSEL1            = 0xFB9
+#word       ANSEL0            = 0xFB8
+
+#define     BIT_SHIFT_0         0x00
+#define     BIT_SHIFT_1         0x01
+#define     BIT_SHIFT_2         0x02
+#define     BIT_SHIFT_3         0x03
+#define     BIT_SHIFT_4         0x04
+#define     BIT_SHIFT_5         0x05
+#define     BIT_SHIFT_6         0x06
+#define     BIT_SHIFT_7         0x07
+#define     BIT_SHIFT_8         0x08
+
+#define     MINDUTYPERCENT      0x00            //0%
+#define     MAXDUTYPERCENT      0x64            //100%
+#define     MINDUTYCNT          0x0000          //0
+#define     MAXDUTYCNT          0x0FFF          //For 12 bit Counter
+
+#define     CHANNEL0_PAIR       0x00            //PWM 0, 1 Pair
+#define     CHANNEL1_PAIR       0x01            //PWM 2, 3 Pair
+#define     CHANNEL2_PAIR       0x02            //PWM 4, 5 Pair
+#define     CHANNEL3_PAIR       0x03            //PWM 6, 7 Pair
+
+#define     FREQUENCY_20HZ      20              //20 Hz
+#define     FREQUENCY_1KHZ      1000            //1 KHz
+
+typedef struct PWMProperty
+{
+    unsigned int PeriodCnt;                     //Conunt for Period max 12 Bit
+    unsigned int DutyCycleCnt;                  //Conunt for Duty max 12 Bit
+    unsigned int DutyCyclePercent;              //Vary between 0~100%
+}pwmproperty;
+pwmproperty pwmproperty1;                       //To store PWM propoerties
+
+void pwm_int(void);
+void pwm_init_test(void);
+int LIMIT(int value, int min, int max);
+void setPWMPeriod(pwmproperty *pwmsignal,unsigned int FreqHz);
+void setDutyCycle(unsigned char channelno ,pwmproperty *pwmsignal, unsigned int percent);
+
+int LIMIT(int value, int min, int max)
+{
+    if(value > max)
+    {
+        value = max;
+    }
+    else if(value < min)
+    {
+        value = min;
+    }
+    return (value);
+}
+
+void main(void) {
+  int i =0;
+  
+  set_tris_b(0x00);
+  set_tris_d(0x00);
+  
+  ANSEL0=ANSEL1=0X00;
+  
+  pwm_init_test();
+  
+  while(TRUE)
+  {
+   pwm_init_test();
+   delay_ms(100);
+  }
+}
+void pwm_init_test(void)
+{    
+    PTMRL   = 0X00;         //   PWM Time Base (lower 8 bits)
+    PTMRH   = 0X00;         //   PWM Time Base (upper 4 bits)
+
+    PTPERL  = 0X00;         //   PWM Time Base Period (lower 8 bits)
+    PTPERH  = 0X00;         //   PWM Time Base Period (upper 4 bits)
+
+    PDC0L   = 0X00;         //   PWM Duty Cycle #0L register (Lower 8 bits)
+    PDC0H   = 0X00;          //   PWM Duty Cycle #0H register (Upper 6 bits)
+
+    PDC1L   = 0X00;         //   PWM Duty Cycle #1L register (Lower 8 bits)
+    PDC1H   = 0X00;         //   PWM Duty Cycle #2H register (Upper 6 bits)
+
+    PDC2L   = 0X00;         //   PWM Duty Cycle #2L register (Lower 8 bits)
+    PDC2H   = 0X00;         //   PWM Duty Cycle #2H register (Upper 6 bits)
+
+    PDC3L   = 0X00;         //   PWM Duty Cycle #3L register (Lower 8 bits)
+    PDC3H   = 0X00;         //   PWM Duty Cycle #3H register (Upper 6 bits)
+////////////////////////////////////////////////////////////////////////////////
+    /*PTCON0: PWM TIMER CONTROL REGISTER 0*/
+    /* bit 7-4 PTOPS3:PTOPS0: PWM Time Base Output Postscale Select bits
+        X0000 =1:1 Postscale
+        0001 =1:2 Postscale
+        .
+        .
+        1111 =1:16 Postscale
+     */
+    /* bit 3-2 PTCKPS1:PTCKPS0: PWM Time Base Input Clock Prescale Select bits
+        X00 =PWM time base input clock is Fosc/4 (1:1 prescale)
+        01 =PWM time base input clock is Fosc/16 (1:4 prescale)
+        10 =PWM time base input clock is Fosc/64 (1:16 prescale)
+        11 =PWM time base input clock is Fosc/256 (1:64 prescale)
+    */
+    /*bit 1-0 PTMOD1:PTMOD0: PWM Time Base Mode Select bits
+        11 =PWM time base operates in a Continuous Up/Down mode with interrupts for double PWM        updates.
+        10 =PWM time base operates in a Continuous Up/Down Counting mode.
+        01 =PWM time base configured for Single-shot mode.
+        X00 =PWM time base operates in a Free Running mode.
+     */
+
+    PTCON0  = 0x00
+            |(0x00     << BIT_SHIFT_4)
+            |(0x00     << BIT_SHIFT_2)
+            |(0x00);
+////////////////////////////////////////////////////////////////////////////////
+    /*PTCON1: PWM TIMER CONTROL REGISTER 1*/
+    /*bit 7 PTEN: PWM Time Base Timer Enable bit
+        1 = PWM time base is ON
+        X0 = PWM time base is OFF
+     */
+    /*bit 6 PTDIR: PWM Time Base Count Direction Status bit
+        1 = PWM time base counts down.
+        X0 = PWM time base counts up.
+     */
+    /*bit 5-0 Unimplemented: Read as ?0?. */
+    PTCON1  = 0x00
+            |(0x01     << BIT_SHIFT_7)
+            |(0x00     << BIT_SHIFT_6);
+////////////////////////////////////////////////////////////////////////////////
+    /*PWMCON0: PWM CONTROL REGISTER 0*/
+    /*bit 7 Unimplemented: Read as ?0?.*/
+    /*bit 6-4 PWMEN2:PWMEN0: PWM Module Enable bits(1)
+        111 =All odd PWM I/O pins enabled for PWM output(2).
+        110 =PWM1, PWM3 pins enabled for PWM output.
+        101 =All PWM I/O pins enabled for PWM output(2) .
+        100 =PWM0, PWM1, PWM2, PWM3, PWM4 and PWM5 pins enabled for PWM output.
+        011 =PWM0, PWM1, PWM2 and PWM3 I/O pins enabled for PWM output.
+        010 =PWM0 and PWM1 pins enabled for PWM output.
+        001 =PWM1 pin is enabled for PWM output.
+        000 =PWM module disabled. All PWM I/O pins are general purpose I/O.
+     */
+    /*bit 3-0 PMOD3:PMOD0: PWM Output Pair Mode bits
+        For PMOD0:
+        1 = PWM I/O pin pair (PWM0, PWM1) is in the Independent mode.
+        0 = PWM I/O pin pair (PWM0, PWM1) is in the Complementary mode.
+        For PMOD1:
+        1 = PWM I/O pin pair (PWM2, PWM3) is in the Independent mode.
+        0 = PWM I/O pin pair (PWM2, PWM3) is in the Complementary mode.
+        For PMOD2:
+        1 = PWM I/O pin pair (PWM4, PWM5) is in the Independent mode.
+        0 = PWM I/O pin pair (PWM4, PWM5) is in the Complementary mode.
+        For PMOD3(3):
+        1 = PWM I/O pin pair (PWM6, PWM7) is in the Independent mode.
+        0 = PWM I/O pin pair (PWM6, PWM7) is in the Complementary mode.
+     */
+    PWMCON0  = 0x00
+            |(0x05     << BIT_SHIFT_4)
+            |(0x00);
+////////////////////////////////////////////////////////////////////////////////
+    /*PWMCON1: PWM CONTROL REGISTER 1
+    bit 7-4 SEVOPS3:SEVOPS0: PWM Special Event Trigger Output Postscale Select bits
+        0000 =1:1 Postscale
+        0001 =1:2 Postscale
+        .
+        1111 =1:16 Postscale
+    bit 3 SEVTDIR: Special Event Trigger Time Base Direction bit
+        1 = A special event trigger will occur when the PWM time base is counting downwards.
+        0 = A special event trigger will occur when the PWM time base is counting upwards.
+    bit 2 Unimplemented: Read as ?0?.
+    bit 1 UDIS: PWM Update Disable bit
+        1 = Updates from duty cycle and period buffer registers are disabled.
+        0 = Updates from duty cycle and period buffer registers are enabled.
+    bit 0 OSYNC: PWM Output Override Synchronization bit
+        1 = Output overrides via the OVDCON register are synchronized to the the PWM time base.
+        0 = Output overrides via the OVDCON register are asynchronous.*/
+    PWMCON1  = 0x00
+            |(0x00     << BIT_SHIFT_4)
+            |(0x00     << BIT_SHIFT_3)
+            |(0x00     << BIT_SHIFT_1)
+            |(0x01);
+////////////////////////////////////////////////////////////////////////////////
+
+    setPWMPeriod(&pwmproperty1,FREQUENCY_1KHZ);
+    setDutyCycle(CHANNEL0_PAIR,&pwmproperty1,5);
+    setDutyCycle(CHANNEL1_PAIR,&pwmproperty1,50);
+    setDutyCycle(CHANNEL2_PAIR,&pwmproperty1,75);
+    setDutyCycle(CHANNEL3_PAIR,&pwmproperty1,10);
+}
+
+void setPWMPeriod(pwmproperty *pwmsignal,unsigned int FreqHz)
+{
+    unsigned long    Fosc            = 8000000;         //8 MHz 
+    unsigned int     ptmrpsreg       = 0x01;            //1:1
+    unsigned int     ptperreg        = 0x00;
+    unsigned char    ptperregL       = 0x00;
+    unsigned char    ptperregH       = 0x00;
+
+    ptperreg = ((Fosc/4)/(ptmrpsreg*FreqHz))-1;
+    pwmsignal->PeriodCnt = ptperreg;
+    ptperreg = ptperreg&0x0FFF;
+
+    ptperregL   = ptperreg&0x00FF;
+    ptperregH   = (ptperreg&0x0F00)>>BIT_SHIFT_8;
+
+    PTPERL = ptperregL;         //   PWM Time Base Period (lower 8 bits)
+    PTPERH = ptperregH;         //   PWM Time Base Period (upper 4 bits)
+    
+}
+void setDutyCycle(unsigned char channelno ,pwmproperty *pwmsignal,  unsigned int percent)
+{
+    unsigned char    dutycntL    = 0x00;
+    unsigned char    dutycntH    = 0x00;
+    unsigned int     dutycnt     = 0x00;
+    unsigned long    period      = 0x00;
+    unsigned int     temp        = 0x00;
+
+    LIMIT(percent, MINDUTYPERCENT, MAXDUTYPERCENT);
+    pwmsignal->DutyCyclePercent  = percent;
+    period = pwmsignal->PeriodCnt;
+    pwmsignal->DutyCycleCnt      = (percent*period/100);
+    LIMIT(pwmsignal->DutyCycleCnt, MINDUTYCNT, MAXDUTYCNT);
+    
+    switch(channelno)
+    {
+        case CHANNEL0_PAIR:
+            dutycnt     = pwmsignal->DutyCycleCnt << BIT_SHIFT_2;
+            dutycntL    = dutycnt & 0x00FF;
+            dutycntH    = (dutycnt & 0x3F00)>>BIT_SHIFT_8;
+            PDC0L       = dutycntL;
+            PDC0H       = dutycntH;
+            break;
+        case CHANNEL1_PAIR:
+            dutycnt     = pwmsignal->DutyCycleCnt << BIT_SHIFT_2;
+            dutycntL    = dutycnt & 0x00FF;
+            dutycntH    = (dutycnt & 0x3F00)>>BIT_SHIFT_8;
+            PDC1L       = dutycntL;
+            PDC1H       = dutycntH;
+            break;
+        case CHANNEL2_PAIR:
+            dutycnt     = pwmsignal->DutyCycleCnt << BIT_SHIFT_2;
+            dutycntL    = dutycnt & 0x00FF;
+            dutycntH    = (dutycnt & 0x3F00)>>BIT_SHIFT_8;
+            PDC2L       = dutycntL;
+            PDC2H       = dutycntH;
+            break;
+        case CHANNEL3_PAIR:
+            dutycnt     = pwmsignal->DutyCycleCnt << BIT_SHIFT_2;
+            dutycntL    = dutycnt & 0x00FF;
+            dutycntH    = (dutycnt & 0x3F00)>>BIT_SHIFT_8;
+            PDC3L       = dutycntL;
+            PDC3H       = dutycntH;
+            break;
+        default:
+
+            break;
+    }
+}
